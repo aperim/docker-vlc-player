@@ -1,23 +1,24 @@
-FROM bitnami/minideb
+FROM debian
 
-RUN install_packages vlc \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y vlc \
     vlc-plugin-* \
-    g++ \
-    python3-pip \
-    python3-setuptools \
-    python3-dev \
-    build-essential \
     xserver-xorg-core \
+    xserver-xorg-video-fbdev \
+    x11-xserver-utils \
+    libgl1-mesa-dri \
+    xserver-xorg-video-vesa \
+    xautomation \
+    feh \
+    xauth \
     xinit \
-    lxsession \
-    desktop-file-utils \
-    matchbox-keyboard \
     libasound2-dev \
     alsa-utils \
     unclutter
 
 # disable lxpolkit popup warning
-RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
+# RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
 
 # Set wallpaper
 # COPY /conf/desktop-items-0.conf /root/.config/pcmanfm/LXDE-pi/

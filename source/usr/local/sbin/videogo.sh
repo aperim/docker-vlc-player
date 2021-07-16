@@ -23,4 +23,4 @@ sleep 5
 unclutter -display :0 -idle 0.1 &
 
 # Start the VLC media player
-python3 media_player.py
+/usr/bin/vlc -Rf rtp://@234.0.1.255:1234
