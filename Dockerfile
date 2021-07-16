@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:latest
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
@@ -37,6 +37,21 @@ COPY /source/usr/local/sbin/videogo.sh /usr/local/sbin/videogo.sh
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV 1
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.opencontainers.image.source https://github.com/aperim/docker-vlc-player
+LABEL org.label-schema.build-date=$BUILD_DATE \
+  org.label-schema.name="Full screen VLC player" \
+  org.label-schema.description="Play a stream full screen" \
+  org.label-schema.url="https://github.com/aperim/docker-vlc-player" \
+  org.label-schema.vcs-ref=$VCS_REF \
+  org.label-schema.vcs-url="https://github.com/aperim/docker-vlc-player" \
+  org.label-schema.vendor="Aperim Pty Ltd" \
+  org.label-schema.version=$VERSION \
+  org.label-schema.schema-version="1.0"
+
 
 # Install Python modules
 # COPY ./requirements/base.txt /code/requirements/base.txt
