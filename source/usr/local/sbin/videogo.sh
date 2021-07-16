@@ -23,4 +23,4 @@ sleep 5
 unclutter -display :0 -idle 0.1 &
 
 # Start the VLC media player
-/usr/bin/vlc -Rf rtp://@234.0.1.255:1234
+/usr/bin/cvlc -q --no-osd -L -f --no-video-title-show --x11-display :0 rtp://@234.0.1.255:1234
