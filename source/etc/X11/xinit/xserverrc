@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec /usr/bin/X -s 0 dpms -nolisten tcp "$@"
