@@ -8,6 +8,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     xserver-xorg-video-fbdev \
     x11-xserver-utils \
     libgl1-mesa-dri \
+    libvdpau1 \
+    vdpau-va-driver \
     xserver-xorg-video-vesa \
     xautomation \
     feh \
@@ -31,7 +33,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 # COPY /conf/autostart /root/.config/lxsession/LXDE-pi/
 
 # Disable screen from turning it off
-COPY /source/etc/X11/xinit/xserverrc /etc/X11/xinit/xserverrc
+# COPY /source/etc/X11/xinit/xserverrc /etc/X11/xinit/xserverrc
 
 COPY /source/usr/local/sbin/videogo.sh /usr/local/sbin/videogo.sh
 
