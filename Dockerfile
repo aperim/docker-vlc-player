@@ -11,8 +11,6 @@ RUN install_packages vlc \
     xinit \
     lxsession \
     desktop-file-utils \
-    rpd-icons \
-    gtk2-engines-clearlookspix \
     matchbox-keyboard \
     libasound2-dev \
     alsa-utils \
