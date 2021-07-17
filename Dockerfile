@@ -37,7 +37,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     xfonts-base \
     xserver-xorg-core \
     xz-utils && \
-    ln -s /usr/bin/Xorg /usr/bin/X && \
     rm -rf /var/lib/apt/lists/*
 
 # disable lxpolkit popup warning
