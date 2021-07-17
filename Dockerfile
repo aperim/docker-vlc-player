@@ -11,7 +11,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y locales
 
-RUN locale-gen $LANG \
+RUN sed -i "/${LANG}/s/^# //g" /etc/locale.gen && \
+    locale-gen $LANG \
 	&& update-locale LANG=$LANG
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
