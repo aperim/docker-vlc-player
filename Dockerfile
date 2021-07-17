@@ -38,11 +38,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     xauth \
     xfonts-base \
     xserver-xorg-input-all \
-    xserver-xorg-video-intel \
     xserver-xorg-core \
     xorg \
-    xz-utils && \
-    rm -rf /var/lib/apt/lists/*
+    xz-utils 
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
+
+RUN rm -rf /var/lib/apt/lists/*
 
 # disable lxpolkit popup warning
 # RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
