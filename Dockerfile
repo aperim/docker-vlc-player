@@ -9,7 +9,12 @@ ENV LANGUAGE $LANG
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y locales
+
+RUN locale-gen $LANG \
+	&& update-locale LANG=$LANG
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     alsa-utils \
     avahi-utils \
     dbus \
@@ -18,7 +23,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     libgl1-mesa-glx \
     libglu1-mesa \
     locales \
-    unclutter && \
+    unclutter \
     unzip \
     vlc \
     vlc-plugin-* \
@@ -30,12 +35,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     xauth \
     xfonts-base \
     xserver-xorg-core \
-    xz-utils \
+    xz-utils && \
     ln -s /usr/bin/Xorg /usr/bin/X && \
     rm -rf /var/lib/apt/lists/*
-
-RUN locale-gen $LANG \
-	&& update-locale LANG=$LANG
 
 # disable lxpolkit popup warning
 # RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
