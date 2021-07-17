@@ -6,6 +6,10 @@ sed -i 's/geteuid/getppid/' /usr/bin/vlc
 # Remove the X server lock file so ours starts cleanly
 rm /tmp/.X0-lock &>/dev/null || true
 
+# Create XDG_RUNTIME_DIR
+mkdir -pv ~/.cache/xdgr
+export XDG_RUNTIME_DIR=$PATH:~/.cache/xdgr
+
 # Set the display to use
 export DISPLAY=:0
 
