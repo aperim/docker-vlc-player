@@ -4,34 +4,38 @@ FROM debian:latest
 ARG LANG=en_US.UTF-8
 
 ENV LANG $LANG
-RUN locale-gen $LANG \
-	&& update-locale LANG=$LANG
+ENV LC_ALL $LANG
+ENV LANGUAGE $LANG
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    vlc \
-    vlc-plugin-* \
-    xz-utils \
-    unzip \
+    alsa-utils \
     avahi-utils \
     dbus \
-	xserver-xorg-core \
-    libgl1-mesa-glx \
+    libasound2-dev \
     libgl1-mesa-dri \
+    libgl1-mesa-glx \
     libglu1-mesa \
-    xfonts-base \
-	x11-session-utils \
+    locales \
+    unclutter && \
+    unzip \
+    vlc \
+    vlc-plugin-* \
+    x11-common \
+    x11-session-utils \
     x11-utils \
     x11-xfs-utils \
     x11-xserver-utils \
     xauth \
-    x11-common \
-    libasound2-dev \
-    alsa-utils \
-    unclutter && \
+    xfonts-base \
+    xserver-xorg-core \
+    xz-utils \
     ln -s /usr/bin/Xorg /usr/bin/X && \
     rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen $LANG \
+	&& update-locale LANG=$LANG
 
 # disable lxpolkit popup warning
 # RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
