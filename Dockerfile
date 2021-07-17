@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:sid
 
 # Defaults, can be changed at build time
 ARG LANG=en_US.UTF-8
