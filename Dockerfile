@@ -23,6 +23,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libgl1-mesa-dri \
     libgl1-mesa-glx \
     libglu1-mesa \
+    libgtk-3-0 \
+    libnss3 \
     locales \
     unclutter \
     unzip \
@@ -35,7 +37,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     x11-xserver-utils \
     xauth \
     xfonts-base \
+    xserver-xorg-input-all \
+    xserver-xorg-video-intel \
     xserver-xorg-core \
+    xorg \
     xz-utils && \
     rm -rf /var/lib/apt/lists/*
 
@@ -82,6 +87,13 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 # COPY . /code/
 # WORKDIR /code/
+
+HEALTHCHECK \
+    --interval=1m \
+    --timeout=3s \
+    --start-period=30s \
+    --retries=3 \
+    CMD pidof vlc > /dev/null || exit 1
 
 # pi.sh will run when the container starts up on the device
 CMD ["/usr/local/sbin/videogo.sh"]
