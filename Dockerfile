@@ -1,23 +1,37 @@
 FROM debian:latest
 
+# Defaults, can be changed at build time
+ARG LANG=en_US.UTF-8
+
+ENV LANG $LANG
+RUN locale-gen $LANG \
+	&& update-locale LANG=$LANG
+
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y vlc \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    vlc \
     vlc-plugin-* \
-    xserver-xorg-core \
-    xserver-xorg-video-fbdev \
-    x11-xserver-utils \
+    xz-utils \
+    unzip \
+    avahi-utils \
+    dbus \
+	xserver-xorg-core \
+    libgl1-mesa-glx \
     libgl1-mesa-dri \
-    libvdpau1 \
-    vdpau-va-driver \
-    xserver-xorg-video-vesa \
-    xautomation \
-    feh \
+    libglu1-mesa \
+    xfonts-base \
+	x11-session-utils \
+    x11-utils \
+    x11-xfs-utils \
+    x11-xserver-utils \
     xauth \
-    xinit \
+    x11-common \
     libasound2-dev \
     alsa-utils \
-    unclutter
+    unclutter && \
+    ln -s /usr/bin/Xorg /usr/bin/X && \
+    rm -rf /var/lib/apt/lists/*
 
 # disable lxpolkit popup warning
 # RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
