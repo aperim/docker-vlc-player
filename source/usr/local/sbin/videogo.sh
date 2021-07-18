@@ -47,7 +47,14 @@ if [ -z "${VLC_ZOOM}" ]; then
     VLC_ZOOM=1
 fi
 
-VLC_AVCODEC_OPTIONS="--avcodec-dr --avcodec-corrupted --avcodec-hurry-up --avcodec-skip-frame=1 --avcodec-skip-idct=1 --avcodec-fast --avcodec-threads=${VLC_THREADS} --sout-avcodec-strict=-2"
+if [ -z "${VLC_DISPLAY}" ]; then
+    VLC_DISPLAY=:0
+fi
+
+if [ -z "${VLC_AVCODEC_OPTIONS}" ]; then
+    # VLC_AVCODEC_OPTIONS="--avcodec-dr --avcodec-corrupted --avcodec-hurry-up --avcodec-skip-frame=1 --avcodec-skip-idct=1 --avcodec-fast --avcodec-threads=${VLC_THREADS} --sout-avcodec-strict=-2"
+    VLC_AVCODEC_OPTIONS=""
+fi
 
 # Allow VLC to run as root
 sed -i 's/geteuid/getppid/' /usr/bin/vlc
@@ -60,10 +67,12 @@ mkdir -pv ~/.cache/xdgr
 export XDG_RUNTIME_DIR=$PATH:~/.cache/xdgr
 
 # Set the display to use
-export DISPLAY=:0
+export DISPLAY=${VLC_DISPLAY}
 
 # Set the DBUS address for sending around system messages
-export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
+if [ -f "/host/run/dbus/system_bus_socket" ]; then
+    export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
+fi
 
 # Start the desktop manager
 echo "STARTING X"
