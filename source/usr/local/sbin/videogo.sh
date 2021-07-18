@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 VLC=$(command -v cvlc)
+XSET=$(command -v xset)
 
 if [ -z "${VLC_SOURCE_URL}" ]; then
     echo "Source URL not defined (VLC_SOURCE_URL)"
@@ -55,6 +56,10 @@ if [ -z "${VLC_AVCODEC_OPTIONS}" ]; then
     # VLC_AVCODEC_OPTIONS="--avcodec-dr --avcodec-corrupted --avcodec-hurry-up --avcodec-skip-frame=1 --avcodec-skip-idct=1 --avcodec-fast --avcodec-threads=${VLC_THREADS} --sout-avcodec-strict=-2"
     VLC_AVCODEC_OPTIONS=""
 fi
+
+${XSET} s off
+${XSET} -dpms
+${XSET} s noblank
 
 # Allow VLC to run as root
 sed -i 's/geteuid/getppid/' /usr/bin/vlc
