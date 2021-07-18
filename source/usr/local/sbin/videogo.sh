@@ -57,10 +57,6 @@ if [ -z "${VLC_AVCODEC_OPTIONS}" ]; then
     VLC_AVCODEC_OPTIONS=""
 fi
 
-${XSET} s off
-${XSET} -dpms
-${XSET} s noblank
-
 # Allow VLC to run as root
 sed -i 's/geteuid/getppid/' /usr/bin/vlc
 
@@ -85,6 +81,10 @@ startx -- -nocursor &
 
 # TODO: work out how to detect X has started
 sleep 5
+
+${XSET} s off
+${XSET} -dpms
+${XSET} s noblank
 
 # Hide the cursor
 unclutter -display ${DISPLAY} -idle 0.1 &
