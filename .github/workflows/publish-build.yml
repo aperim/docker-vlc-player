@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        name: Checkout
+        name: 🗃 Checkout
         uses: actions/checkout@v2
       -
-        name: Prepare
+        name: 🧑‍🍳 Prepare
         id: prepare
         run: |
           VERSION=edge
@@ -30,15 +30,15 @@ jobs:
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo ::set-output name=vcs_ref::${GITHUB_SHA::8}
       -
-        name: Set up QEMU
+        name: 👷 Set up QEMU
         uses: docker/setup-qemu-action@v1
       -
-        name: Set up Docker Buildx
+        name: 🧑‍💻 Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
           install: true
       - 
-        name: Cache Docker layers
+        name: 📸 Cache Docker layers
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
@@ -47,20 +47,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-multi-buildx
       -
-        name: Login to DockerHub
+        name: 🔓 Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       -
-        name: Login to GitHub Container Registry
+        name: 🔓 Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CI_PAT }}
       -
-        name: Build web and push
+        name: 🏗 Build player container and push
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -77,7 +77,7 @@ jobs:
             aperimau/vlc-player:${{ steps.prepare.outputs.version }}
             ghcr.io/aperim/vlc-player:${{ steps.prepare.outputs.version }}
       -
-        name: Move cache
+        name: 🚚 Move cache
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
