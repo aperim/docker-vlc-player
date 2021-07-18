@@ -91,5 +91,4 @@ unclutter -display ${DISPLAY} -idle 0.1 &
 
 # Start the VLC media player
 # /usr/bin/cvlc -q --no-osd -L -f --no-video-title-show --x11-display ${DISPLAY} --zoom 2 --no-repeat --no-loop --drop-late-frames --skip-frames --play-and-exit rtp://@234.0.1.255:1234 vlc://quit
-# ${VLC} --verbose=${VLC_VERBOSE} --no-disable-screensaver ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --play-and-exit --adaptive-logic="${VLC_ADAPTIVE_LOGIC}" --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} "${VLC_SOURCE_URL}" vlc://quit
-${VLC} "${VLC_SOURCE_URL}" vlc://quit
+${VLC} --verbose=${VLC_VERBOSE} --no-disable-screensaver ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --play-and-exit --adaptive-logic="${VLC_ADAPTIVE_LOGIC}" --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} ${VLC_SOURCE_URL} vlc://quit
