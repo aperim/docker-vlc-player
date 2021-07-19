@@ -54,8 +54,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 RUN rm -rf /var/lib/apt/lists/*
 
 COPY /source/usr/local/sbin/videogo.sh /usr/local/sbin/videogo.sh
-COPY /source/usr/share/X11/xorg.conf.d/screen-resolution.conf /usr/share/X11/xorg.conf.d/screen-resolution.conf
-COPY /source/etc/X11/xorg.conf.d/screen-resolution.conf /etc/X11/xorg.conf.d/screen-resolution.conf
+# COPY /source/usr/share/X11/xorg.conf.d/screen-resolution.conf /usr/share/X11/xorg.conf.d/screen-resolution.conf
+# COPY /source/etc/X11/xorg.conf.d/screen-resolution.conf /etc/X11/xorg.conf.d/screen-resolution.conf
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV 1
