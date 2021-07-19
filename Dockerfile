@@ -1,4 +1,4 @@
-FROM debian:sid
+FROM debian:latest
 
 # Defaults, can be changed at build time
 ARG LANG=en_US.UTF-8
@@ -6,6 +6,13 @@ ARG LANG=en_US.UTF-8
 ENV LANG $LANG
 ENV LC_ALL $LANG
 ENV LANGUAGE $LANG
+
+HEALTHCHECK \
+    --interval=1m \
+    --timeout=3s \
+    --start-period=30s \
+    --retries=3 \
+    CMD pidof vlc > /dev/null || exit 1
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
@@ -46,23 +53,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
 RUN rm -rf /var/lib/apt/lists/*
 
-# disable lxpolkit popup warning
-# RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
-
-# Set wallpaper
-# COPY /conf/desktop-items-0.conf /root/.config/pcmanfm/LXDE-pi/
-
-# Autohide desktop panel
-# COPY /conf/panel /root/.config/lxpanel/LXDE-pi/panels/
-
-# Hide desktop panel completely
-# COPY /conf/autostart /etc/xdg/lxsession/LXDE-pi/
-# COPY /conf/autostart /root/.config/lxsession/LXDE-pi/
-
-# Disable screen from turning it off
-# COPY /source/etc/X11/xinit/xserverrc /etc/X11/xinit/xserverrc
-
 COPY /source/usr/local/sbin/videogo.sh /usr/local/sbin/videogo.sh
+COPY /source/usr/share/X11/xorg.conf.d/screen-resolution.conf /usr/share/X11/xorg.conf.d/screen-resolution.conf
+COPY /source/etc/X11/xorg.conf.d/screen-resolution.conf /etc/X11/xorg.conf.d/screen-resolution.conf
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV 1
@@ -81,21 +74,4 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
   org.label-schema.version=$VERSION \
   org.label-schema.schema-version="1.0"
 
-
-# Install Python modules
-# COPY ./requirements/base.txt /code/requirements/base.txt
-# COPY ./requirements/prod.txt /code/requirements/prod.txt
-# RUN pip3 install -Ur /code/requirements/prod.txt
-
-# COPY . /code/
-# WORKDIR /code/
-
-HEALTHCHECK \
-    --interval=1m \
-    --timeout=3s \
-    --start-period=30s \
-    --retries=3 \
-    CMD pidof vlc > /dev/null || exit 1
-
-# pi.sh will run when the container starts up on the device
 CMD ["/usr/local/sbin/videogo.sh"]
