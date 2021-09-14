@@ -64,6 +64,9 @@ sed -i 's/geteuid/getppid/' /usr/bin/vlc
 rm /tmp/.X0-lock &>/dev/null || true
 
 # Create XDG_RUNTIME_DIR
+if [ -d "~/.cache" ]; then
+    rm -Rf ~/.cache
+fi
 mkdir -pv ~/.cache/xdgr
 export XDG_RUNTIME_DIR=$PATH:~/.cache/xdgr
 
