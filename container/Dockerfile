@@ -53,7 +53,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY rootfs/ /
 
