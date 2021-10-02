@@ -183,9 +183,12 @@ jobs:
         with:
           path: /tmp/.buildx-cache
           # Key is named differently to avoid collision
+          # yamllint disable-line rule:line-length
           key: ${{ runner.os }}-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
+          # yamllint disable rule:line-length
           restore-keys: |
             ${{ runner.os }}-${{ matrix.varient.base }}-${{ matrix.varient.tag }}
+          # yamllint enable rule:line-length
 
       - name: 🏗 Set up QEMU
         uses: docker/setup-qemu-action@v1
