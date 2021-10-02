@@ -6,24 +6,28 @@
         "varient": [
             {
                 "os": "ubuntu-latest",
+                "os-id": "linux",
                 "base": "debian",
                 "tag": "buster",
                 "platforms": "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
             },
             {
                 "os": "windows-latest",
+                "os-id": "windows",
                 "base": "debian",
                 "tag": "buster",
                 "platforms": "linux/amd64,linux/386"
             },
             {
                 "os": "macos-latest",
+                "os-id": "macos",
                 "base": "debian",
                 "tag": "buster",
                 "platforms": "linux/amd64"
             },
             {
                 "os": "ubuntu-latest",
+                "os-id": "rpi",
                 "base": "balenalib/raspberry-pi-debian",
                 "tag": "buster",
                 "platforms": "linux/arm/v6,linux/arm/v7,linux/arm64/v8"

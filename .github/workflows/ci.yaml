@@ -98,6 +98,8 @@ jobs:
         uses: ludeeus/action-shellcheck@1.1.0
         env:
           SHELLCHECK_OPTS: -s bash
+        with:
+          ignore: .devcontainer
 
   lint-yamllint:
     name: YAMLLint

@@ -165,8 +165,8 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/aperim/vlc-player
-            aperimau/vlc-player
+            ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}
+            aperimau/vlc-player-${{ matrix.varient.os-id }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
@@ -248,7 +248,7 @@ jobs:
         run: |
           if vcn authenticate \
             --output json \
-            "docker://ghcr.io/Pioneera/api-workflow-test:${{ github.sha }}" \
+            "docker://ghcr.io/ghcr.io/aperim/vlc-player:${{ github.sha }}" \
             | jq \
               --exit-status \
               '.verification.status != 0';
@@ -256,7 +256,7 @@ jobs:
             vcn login
             vcn notarize \
               --public \
-              "docker://ghcr.io/Pioneera/api-workflow-test:${{ github.sha }}"
+              "docker://ghcr.io/ghcr.io/aperim/vlc-player:${{ github.sha }}"
           fi
         # yamllint enable rule:line-length
         env:
