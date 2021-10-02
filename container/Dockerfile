@@ -68,7 +68,7 @@ ARG BUILD_REPOSITORY
 ARG BUILD_REF
 ARG BUILD_VERSION
 
-CMD ["/usr/local/sbin/videogo.sh"]
+CMD ["/usr/local/sbin/videogo"]
 
 LABEL \
     maintainer="Troy Kelly <troy@aperim.com.com>" \
