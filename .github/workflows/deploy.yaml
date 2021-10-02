@@ -24,6 +24,7 @@ jobs:
       matrix: ${{ steps.information.outputs.matrix }}
       vendor: ${{ steps.information.outputs.vendor }}
       version: ${{ steps.information.outputs.version }}
+      sha_short: ${{ steps.information.outputs.sha_short }}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
@@ -53,7 +54,9 @@ jobs:
           echo ::set-output name=vendor::$(jq -r .vendor config.json)
           echo ::set-output name=matrix::$(jq -r .matrix config.json)
           echo ::set-output name=build_date::$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
         # yamllint enable rule:line-length
+
       - name: 🛡 Protect Production
         if: steps.information.outputs.environment == 'production'
         # yamllint disable rule:line-length
@@ -178,7 +181,7 @@ jobs:
         run: |
           if vcn authenticate \
             --output json \
-            "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:${{ github.sha }}" \
+            "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:sha-${{ needs.information.outputs.sha_short }}" \
             | jq \
               --exit-status \
               '.verification.status != 0';
@@ -186,7 +189,7 @@ jobs:
             vcn login
             vcn notarize \
               --public \
-              "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:${{ github.sha }}"
+              "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:sha-${{ needs.information.outputs.sha_short }}"
           fi
         # yamllint enable rule:line-length
         env:
