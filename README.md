@@ -48,7 +48,6 @@ services:
 
 ## Contributing
 
-<<<<<<< HEAD
 Pull requests are welcome. For major changes, 
 please open an issue first to discuss what you 
 would like to change.
@@ -56,10 +55,3 @@ would like to change.
 ## License
 
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
-=======
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-[Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
->>>>>>> 34a04f88bebaeb8e1fcac9d7658dccae8dfcfec1
