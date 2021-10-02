@@ -1,7 +1,10 @@
 
 # VLC Player
 
-A containerised VLC player designed for SBC's to playback unicast and multicast streams. Think digital signage.
+A containerised VLC player designed for SBC's to 
+playback unicast and multicast streams.
+
+Think digital signage.
 
 ## Installation
 
@@ -45,7 +48,11 @@ services:
 ```
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Pull requests are welcome. For major changes, 
+please open an issue first to discuss what you 
+would like to change.
 
 ## License
+
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
