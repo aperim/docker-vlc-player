@@ -264,4 +264,3 @@ jobs:
           VCN_PASSWORD: ${{ secrets.VCN_PASSWORD }}
           VCN_NOTARIZATION_PASSWORD: ${{ secrets.VCN_NOTARIZATION_PASSWORD }}
           VCN_OTP_EMPTY: true
-
