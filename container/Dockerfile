@@ -53,7 +53,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY rootfs/ /
 
@@ -71,13 +72,13 @@ ARG BUILD_VERSION
 CMD ["/usr/local/sbin/videogo"]
 
 LABEL \
-    maintainer="Troy Kelly <troy@aperim.com.com>" \
+    maintainer="Troy Kelly <troy@aperim.com>" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
     org.opencontainers.image.vendor="${BUILD_VENDOR}" \
-    org.opencontainers.image.authors="Troy Kelly <troy@aperim.com.com>" \
+    org.opencontainers.image.authors="Troy Kelly <troy@aperim.com>" \
     org.opencontainers.image.licenses="Apache-2.0" \
-    org.opencontainers.image.url="https://aperim.com.com" \
+    org.opencontainers.image.url="https://aperim.com" \
     org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
     org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
     org.opencontainers.image.created=${BUILD_DATE} \
