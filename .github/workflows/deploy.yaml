@@ -71,83 +71,10 @@ jobs:
           exit 1
         # yamllint enable rule:line-length
 
-  lint-hadolint:
-    name: Hadolint
-    needs:
-      - information
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run Hadolint
-        uses: brpaz/hadolint-action@v1.5.0
-        with:
-          dockerfile: "./container/Dockerfile"
-          ignore: "DL3003 DL3007"
-
-  lint-json:
-    name: JSON Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run JQ
-        run: |
-          shopt -s globstar
-          cat **/*.json | jq '.'
-
-  lint-markdown:
-    name: MarkdownLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run mdl
-        uses: actionshub/markdownlint@2.0.2
-
-  lint-shellcheck:
-    name: Shellcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run Shellcheck
-        uses: ludeeus/action-shellcheck@1.1.0
-        env:
-          SHELLCHECK_OPTS: -s bash
-
-  lint-yamllint:
-    name: YAMLLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run YAMLLint
-        uses: frenck/action-yamllint@v1.1
-
-  lint-prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
-      - name: 🚀 Run Prettier
-        uses: creyD/prettier_action@v4.0
-        with:
-          prettier_options: --write **/*.{json,js,md,yaml}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build:
-    name: 👷 Build
+    name: 👷 Build for ${{ matrix.varient.os-id }}
     needs:
       - information
-      - lint-hadolint
-      - lint-json
-      - lint-markdown
-      - lint-prettier
-      - lint-shellcheck
-      - lint-yamllint
     runs-on: ${{ matrix.varient.os }}
     strategy:
       matrix: ${{fromJSON(needs.information.outputs.matrix)}}
@@ -251,7 +178,7 @@ jobs:
         run: |
           if vcn authenticate \
             --output json \
-            "docker://ghcr.io/ghcr.io/aperim/vlc-player:${{ github.sha }}" \
+            "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:${{ github.sha }}" \
             | jq \
               --exit-status \
               '.verification.status != 0';
@@ -259,7 +186,7 @@ jobs:
             vcn login
             vcn notarize \
               --public \
-              "docker://ghcr.io/ghcr.io/aperim/vlc-player:${{ github.sha }}"
+              "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:${{ github.sha }}"
           fi
         # yamllint enable rule:line-length
         env:

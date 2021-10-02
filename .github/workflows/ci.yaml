@@ -186,7 +186,7 @@ jobs:
       - name: 🏗 Set up CodeNotary
         run: bash <(curl https://getvcn.codenotary.com -L)
 
-      - name: 🚀 Build
+      - name: 🚀 Build for ${{ matrix.varient.os-id }}
         uses: docker/build-push-action@v2
         with:
           push: false
