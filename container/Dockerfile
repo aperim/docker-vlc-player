@@ -22,7 +22,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 RUN sed -i "/${LANG}/s/^# //g" /etc/locale.gen && \
     locale-gen $LANG \
-	&& update-locale LANG=$LANG
+    && update-locale LANG=$LANG
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     alsa-utils \
@@ -55,7 +55,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY source/ /
+COPY rootfs/ /
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV 1
