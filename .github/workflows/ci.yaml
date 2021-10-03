@@ -55,18 +55,20 @@ jobs:
         # yamllint enable rule:line-length
 
   lint-hadolint:
-    name: Hadolint
+    name: Hadolint ${{ matrix.varient.os-id }}
     needs:
       - information
     runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJSON(needs.information.outputs.matrix)}}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
       - name: 🚀 Run Hadolint
         uses: brpaz/hadolint-action@v1.5.0
         with:
-          dockerfile: "./container/Dockerfile"
-          ignore: "DL3003 DL3007 DL3008"
+          dockerfile: "./container/Dockerfile.${{ matrix.varient.os-id }}"
+          ignore: "DL3003 DL3007 DL3008 DL4006"
 
   lint-json:
     name: JSON Lint
@@ -124,7 +126,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    name: 👷 Build
+    name: 👷 Build ${{ matrix.varient.os-id }}
     needs:
       - information
       - lint-hadolint
@@ -192,7 +194,7 @@ jobs:
           push: false
           builder: ${{ steps.buildx.outputs.name }}
           context: ./container
-          file: ./container/Dockerfile
+          file: "./container/Dockerfile.${{ matrix.varient.os-id }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache

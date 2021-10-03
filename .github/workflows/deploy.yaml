@@ -150,7 +150,7 @@ jobs:
           push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: ./container
-          file: ./container/Dockerfile
+          file: "./container/Dockerfile.${{ matrix.varient.os-id }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
