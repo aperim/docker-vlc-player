@@ -1,0 +1,193 @@
+ARG OS_CONTAINER=debian
+ARG OS_VARIENT=latest
+FROM ${OS_CONTAINER}:${OS_VARIENT}
+
+# Defaults, can be changed at build time
+ARG LANG=en_US.UTF-8
+
+ENV LANG=$LANG
+ENV LC_ALL=$LANG
+ENV LANGUAGE=$LANG
+
+HEALTHCHECK \
+    --interval=1m \
+    --timeout=3s \
+    --start-period=30s \
+    --retries=3 \
+    CMD pidof vlc > /dev/null || exit 1
+
+# If someone wants to use VideoLAN docker images on a local machine and does
+# not want to be disturbed by the videolan user, we should not take an uid/gid
+# in the user range of main distributions, which means:
+# - Debian based: <1000
+# - RPM based: <500 (CentOS, RedHat, etc.)
+ARG VIDEOLAN_UID=499
+
+RUN addgroup --quiet --gid ${VIDEOLAN_UID} videolan && \
+    adduser --quiet --uid ${VIDEOLAN_UID} --ingroup videolan videolan && \
+    echo "videolan:videolan" | chpasswd
+
+# Update and install language
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y locales && \
+    sed -i "/${LANG}/s/^# //g" /etc/locale.gen && \
+    locale-gen $LANG && \
+    update-locale LANG=$LANG
+
+# Basic build tools
+#echo "deb [http://ftp.fr.debian.org/debian/ bullseye main" > /etc/apt/sources.list && \
+RUN echo "APT::Install-Recommends \"false\";\nAPT::Install-Suggests \"false\";" > /etc/apt/apt.conf.d/90local && \
+    mkdir -p /usr/share/man/man1 && \
+    apt-get install -y \
+    ant \
+    automake \
+    autopoint \
+    bison \
+    build-essential \
+    bzip2 \
+    ca-certificates \
+    cmake \
+    crossbuild-essential-armhf \
+    curl \
+    dbus \
+    dos2unix \
+    file \
+    flex \
+    g++-8-arm-linux-gnueabihf \
+    gcc-8-arm-linux-gnueabihf \
+    gettext \
+    git \
+    git-svn \
+    gnupg1 \
+    gperf \
+    help2man \
+    libtool-bin \
+    locales \
+    meson \
+    nano \
+    nasm \
+    ninja-build \
+    openjdk-11-jdk \
+    p7zip-full \
+    pkg-config \
+    python \
+    python3 \
+    qtchooser \
+    ragel \
+    subversion \
+    unclutter \
+    unzip \
+    unzip \
+    vim \
+    wget \
+    x11-common \
+    x11-session-utils \
+    x11-utils \
+    x11-xfs-utils \
+    x11-xserver-utils \
+    xauth \
+    xcb-proto \
+    xfonts-base \
+    xorg \
+    xserver-xorg-core \
+    xserver-xorg-input-all \
+    xz-utils  \
+    yasm \
+    zip && \
+    apt-get -y remove \
+    hicolor-icon-theme \
+    libcairo2:amd64 \
+    libdrm2:amd64 \
+    libpixman-1-0:amd64
+
+RUN set -e && \
+    COMMENT="Pre-compiled Raspbian packages, so we don't rebuild everything" \
+    COMMENT="first install a main dependency, which doesn't work well with the others" \
+    echo "deb [arch=armhf] http://archive.raspberrypi.org/debian bullseye main" >> /etc/apt/sources.list.d/raspbian.list && \
+    echo "deb [arch=armhf] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" >> /etc/apt/sources.list.d/raspbian.list && \
+    curl -o - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - && \
+    curl -o - https://archive.raspbian.org/raspbian.public.key | apt-key add - && \
+    dpkg --add-architecture armhf && \
+    apt-get update && apt-get -y install \
+    libc6:armhf && \
+    COMMENT="Get the Raspberry Pi custom system headers/libraries" \
+    apt-get -y install \
+    libraspberrypi-dev:armhf && \
+    COMMENT="Most prebuilt libraries we use in contribs" \
+    apt-get -y install \
+    libxcb-xkb-dev:armhf libmpg123-dev:armhf  \
+    libogg0:armhf libvorbis0a:armhf \
+    libfaad-dev:armhf libasound2-dev:armhf libfontconfig1-dev:armhf \
+    libgmp-dev:armhf libgcrypt20-dev:armhf nettle-dev:armhf libarchive-dev:armhf \
+    libx264-dev:armhf libxml2-dev:armhf libchromaprint-dev:armhf libgcrypt20:armhf \
+    libaribb24-dev:armhf libass-dev:armhf libbluray-dev:armhf libcddb-dev:armhf libdav1d-dev:armhf libdca-dev:armhf libdvbpsi-dev:armhf \
+    libdvdnav-dev:armhf libdvdread-dev:armhf libflac-dev:armhf libfribidi-dev:armhf libgcrypt-dev:armhf libgme-dev:armhf libharfbuzz-dev:armhf \
+    libkate-dev:armhf libmatroska-dev:armhf \
+    libmicrodns-dev:armhf libmodplug-dev:armhf libmpcdec-dev:armhf libmysofa-dev:armhf libnfs-dev:armhf \
+    libogg-dev:armhf libopus-dev:armhf libpostproc-dev:armhf \
+    libsamplerate-dev:armhf libschroedinger-dev:armhf libshout-dev:armhf libsoxr-dev:armhf libspatialaudio-dev:armhf \
+    libspeex-dev:armhf libspeexdsp-dev:armhf libsqlite3-dev:armhf libsrt-dev:armhf libtheora-dev:armhf libtwolame-dev:armhf libupnp-dev:armhf \
+    libvorbis-dev:armhf libvpx-dev:armhf libx265-dev:armhf libzvbi-dev:armhf \
+    libgnutls28-dev:armhf libmad0-dev:armhf libsdl1.2-dev:armhf libmpeg2-4-dev:armhf \
+    libfluidsynth-dev:armhf libsdl-image1.2-dev:armhf libssh2-1-dev:armhf \
+    libxcb-shm0-dev:armhf libxcb-composite0-dev:armhf libxcb-xv0-dev:armhf libxcb-randr0-dev:armhf \
+    glslang-dev:armhf libplacebo-dev:armhf libaom-dev:armhf libvncserver-dev:armhf \
+    libavcodec-dev:armhf libavformat-dev:armhf libswscale-dev:armhf && \
+    COMMENT="Prebuilt Qt5 packages" \
+    apt-get -y install \
+    qtdeclarative5-dev:armhf \
+    qtquickcontrols2-5-dev:armhf \
+    qml-module-qtquick2:armhf \
+    qml-module-qtquick-controls2:armhf \
+    qml-module-qtquick-layouts:armhf \
+    qml-module-qtquick-window2:armhf \
+    qml-module-qtgraphicaleffects:armhf \
+    qml-module-qtquick2:armhf \
+    libqt5x11extras5-dev:armhf \
+    libqt5svg5-dev:armhf
+
+RUN apt-get install -y xserver-xorg-video-*
+
+# RUN apt-get -y install \
+#     -s -o Debug::pkgProblemResolver=yes \
+#     libgtk-3-0:armhf
+
+# qtchooser doesn't have the arm-linux-gnueabihf target in the native package
+RUN echo /usr/lib/qt5/bin >> /usr/share/qtchooser/qt5-arm-linux-gnueabihf.conf && \
+    echo /usr/lib/arm-linux-gnueabihf >> /usr/share/qtchooser/qt5-arm-linux-gnueabihf.conf && \
+    COMMENT="Clean apt cache" \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/*
+# RUN qtchooser -l  
+
+USER videolan
+
+COPY rootfs/ /
+
+# Enable udevd so that plugged dynamic hardware devices show up in our container.
+ENV UDEV 1
+
+ARG BUILD_DATE
+ARG BUILD_NAME
+ARG BUILD_DESCRIPTION
+ARG BUILD_VENDOR
+ARG BUILD_REPOSITORY
+ARG BUILD_REF
+ARG BUILD_VERSION
+
+CMD ["/usr/local/sbin/videogo"]
+
+LABEL \
+    maintainer="Troy Kelly <troy@aperim.com>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="${BUILD_VENDOR}" \
+    org.opencontainers.image.authors="Troy Kelly <troy@aperim.com>" \
+    org.opencontainers.image.licenses="Apache-2.0" \
+    org.opencontainers.image.url="https://aperim.com" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}

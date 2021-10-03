@@ -65,7 +65,7 @@ jobs:
       - name: 🚀 Run Hadolint
         uses: brpaz/hadolint-action@v1.5.0
         with:
-          dockerfile: "./container/Dockerfile"
+          dockerfile: "./container/Dockerfile.${{ matrix.varient.os-id }}"
           ignore: "DL3003 DL3007 DL3008"
 
   lint-json:
@@ -192,7 +192,7 @@ jobs:
           push: false
           builder: ${{ steps.buildx.outputs.name }}
           context: ./container
-          file: ./container/Dockerfile
+          file: "./container/Dockerfile.${{ matrix.varient.os-id }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
