@@ -39,7 +39,7 @@ ENV LANGUAGE=$LANG
 
 # Debugging
 RUN echo "Debugging" && \
-    apt search arm-linux-gnueabihf && \
+    apt-get search arm-linux-gnueabihf && \
     exit 101
 
 # Basic build tools
