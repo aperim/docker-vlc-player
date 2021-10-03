@@ -40,6 +40,8 @@ ENV LANGUAGE=$LANG
 # Debugging
 RUN echo "Debugging" && \
     apt-cache search arm-linux-gnueabihf && \
+    echo "Next" && \
+    apt-cache search g++-10-arm-linux-gnueabihf && \
     exit 101
 
 # Basic build tools
