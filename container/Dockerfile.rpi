@@ -56,8 +56,8 @@ RUN echo "APT::Install-Recommends \"false\";\nAPT::Install-Suggests \"false\";" 
     dos2unix \
     file \
     flex \
-    g++-8-arm-linux-gnueabihf \
-    gcc-8-arm-linux-gnueabihf \
+    g++-arm-linux-gnueabihf \
+    gcc-9-arm-linux-gnueabihf \
     gettext \
     git \
     git-svn \
