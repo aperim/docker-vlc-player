@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 VLC=$(command -v cvlc)
+REAL_VLC=$(command -v vlc)
 XSET=$(command -v xset)
 
 if [ -z "${VLC_SOURCE_URL}" ]; then
@@ -59,7 +60,7 @@ fi
 
 # Allow VLC to run as root
 # shellcheck disable=SC2086
-sed -i 's/geteuid/getppid/' ${VLC}
+sed -i 's/geteuid/getppid/' ${REAL_VLC}
 
 # Remove the X server lock file so ours starts cleanly
 rm /tmp/.X0-lock &>/dev/null || true
