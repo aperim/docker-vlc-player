@@ -35,6 +35,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libgtk-3-0 \
     libnss3 \
     locales \
+    procps \
     unclutter \
     unzip \
     vlc \

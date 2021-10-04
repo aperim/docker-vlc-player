@@ -59,15 +59,13 @@ jobs:
     needs:
       - information
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{fromJSON(needs.information.outputs.matrix)}}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
       - name: 🚀 Run Hadolint
         uses: brpaz/hadolint-action@v1.5.0
         with:
-          dockerfile: "./container/Dockerfile.${{ matrix.varient.os-id }}"
+          dockerfile: "./container/Dockerfile"
           ignore: "DL3003 DL3007 DL3008 DL4006"
 
   lint-json:
@@ -169,12 +167,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          # Key is named differently to avoid collision
           # yamllint disable-line rule:line-length
-          key: ${{ runner.os }}-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
           # yamllint disable rule:line-length
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.varient.base }}-${{ matrix.varient.tag }}
+            ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}
+            ${{ runner.os }}-buildx-${{ matrix.varient.base }}
+            ${{ runner.os }}-buildx
           # yamllint enable rule:line-length
 
       - name: 🏗 Set up QEMU
@@ -194,7 +194,7 @@ jobs:
           push: false
           builder: ${{ steps.buildx.outputs.name }}
           context: ./container
-          file: "./container/Dockerfile.${{ matrix.varient.os-id }}"
+          file: "./container/Dockerfile"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
