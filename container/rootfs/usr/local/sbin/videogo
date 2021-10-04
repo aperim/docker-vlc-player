@@ -1,4 +1,7 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+# videogo - start an x server and play a video
+#
+# some help from https://github.com/Earnestly/sx/blob/master/sx
 
 VLC=$(command -v cvlc)
 REAL_VLC=$(command -v vlc)

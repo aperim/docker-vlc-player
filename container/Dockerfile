@@ -27,6 +27,7 @@ ENV LANGUAGE $LANG
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     alsa-utils \
     avahi-utils \
+    bash \
     dbus \
     libasound2-dev \
     libgl1-mesa-dri \
