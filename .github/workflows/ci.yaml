@@ -135,6 +135,7 @@ jobs:
       - lint-yamllint
     runs-on: ${{ matrix.varient.os }}
     strategy:
+      fail-fast: false
       matrix: ${{fromJSON(needs.information.outputs.matrix)}}
     steps:
       - name: ⤵️ Check out code from GitHub
