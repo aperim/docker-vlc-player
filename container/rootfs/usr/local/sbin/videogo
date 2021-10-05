@@ -92,8 +92,9 @@ cleanup() {
 }
 
 stty=$(stty -g)
-tty=$(tty)
-tty=${tty#/dev/tty}
+# tty=$(tty)
+# tty=${tty#/dev/tty}
+tty=0
 
 cfgdir=${XDG_CONFIG_HOME:-$HOME/.config}/sx
 datadir=${XDG_DATA_HOME:-$HOME/.local/share}/sx
@@ -125,7 +126,7 @@ ${XSET} s noblank
 unclutter -display :"$tty" -idle 0.1 &
 
 # Start the VLC media player
-VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display :"$tty" ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
+VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display :$tty ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
 while :; do
     echo "📺 Starting VLC"
     echo "🖥 ${VLC_COMMAND}"
