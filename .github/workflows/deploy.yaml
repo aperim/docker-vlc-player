@@ -21,7 +21,6 @@ jobs:
       description: ${{ steps.information.outputs.description }}
       environment: ${{ steps.information.outputs.environment }}
       name: ${{ steps.information.outputs.name }}
-      matrix: ${{ steps.information.outputs.matrix }}
       vendor: ${{ steps.information.outputs.vendor }}
       version: ${{ steps.information.outputs.version }}
       sha_short: ${{ steps.information.outputs.sha_short }}
@@ -52,7 +51,6 @@ jobs:
           echo ::set-output name=name::$(jq -r .name config.json)
           echo ::set-output name=description::$(jq -r .description config.json)
           echo ::set-output name=vendor::$(jq -r .vendor config.json)
-          echo ::set-output name=matrix::$(jq -r .matrix config.json)
           echo ::set-output name=build_date::$(date -u +%Y-%m-%dT%H:%M:%SZ)
           echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
         # yamllint enable rule:line-length
@@ -75,12 +73,39 @@ jobs:
         # yamllint enable rule:line-length
 
   build:
-    name: 👷 Build for ${{ matrix.varient.os-id }}
+    name: 👷 Build ${{ matrix.os }} ${{ matrix.tag }} ${{ matrix.architecture }}
     needs:
       - information
-    runs-on: ${{ matrix.varient.os }}
+    runs-on: ${{ matrix.architecture }}
     strategy:
-      matrix: ${{fromJSON(needs.information.outputs.matrix)}}
+      fail-fast: true
+      matrix:
+        os: ["debian", "raspbian/stretch"]
+        tag: ["bullseye-slim", "latest"]
+        dockerfile: ["general", "raspberry"]
+        architecture: ["ubuntu-latest", "ARM"]
+        platform:
+          [
+            "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x",
+            "linux/arm/v6,linux/arm/v7,linux/arm64/v8",
+          ]
+        exclude:
+          - os: "raspbian/stretch"
+            tag: "bullseye-slim"
+          - os: "debian"
+            tag: "latest"
+          - os: "raspbian/stretch"
+            platform: "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
+          - os: "debian"
+            platform: "linux/arm/v6,linux/arm/v7,linux/arm64/v8"
+          - os: "raspbian/stretch"
+            dockerfile: "general"
+          - os: "debian"
+            dockerfile: "raspberry"
+          - os: "raspbian/stretch"
+            architecture: "ubuntu-latest"
+          - os: "debian"
+            architecture: "ARM"
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
@@ -95,8 +120,8 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}
-            aperimau/vlc-player-${{ matrix.varient.os-id }}
+            ghcr.io/aperim/vlc-player-${{ matrix.dockerfile }}
+            aperimau/vlc-player-${{ matrix.dockerfile }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
@@ -113,12 +138,13 @@ jobs:
         with:
           path: /tmp/.buildx-cache
           # yamllint disable-line rule:line-length
-          key: ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ matrix.os }}-${{ matrix.tag }}-${{ matrix.architecture }}-${{ github.sha }}
           # yamllint disable rule:line-length
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ matrix.varient.base }}-${{ matrix.varient.tag }}
-            ${{ runner.os }}-buildx-${{ matrix.varient.base }}
+            ${{ runner.os }}-buildx-${{ matrix.os }}-${{ matrix.tag }}-${{ matrix.architecture }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ matrix.os }}-${{ matrix.tag }}-${{ matrix.architecture }}
+            ${{ runner.os }}-buildx-${{ matrix.os }}-${{ matrix.tag }}
+            ${{ runner.os }}-buildx-${{ matrix.os }}
             ${{ runner.os }}-buildx
           # yamllint enable rule:line-length
 
@@ -152,12 +178,12 @@ jobs:
           push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: ./container
-          file: "./container/Dockerfile.${{ matrix.varient.dockerfile }}"
+          file: "./container/Dockerfile.${{ matrix.dockerfile }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          platforms: ${{ matrix.varient.platforms }}
+          platforms: ${{ matrix.platform }}
           build-args: |
             BUILD_DATE=${{ needs.information.outputs.build_date }}
             BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
@@ -167,8 +193,8 @@ jobs:
             BUILD_VERSION=${{ needs.information.outputs.version }}
             BUILD_VENDOR=${{ needs.information.outputs.vendor }}
             ENVIRONMENT=${{ needs.information.outputs.description }}
-            OS_CONTAINER=${{ matrix.varient.base }}
-            OS_VARIENT=${{ matrix.varient.tag }}
+            OS_CONTAINER=${{ matrix.os }}
+            OS_VARIENT=${{ matrix.tag }}
       # This ugly bit is necessary, or our cache will grow forever...
       # Well until we hit GitHub's limit of 5GB :)
       # https://github.com/docker/build-push-action/issues/252
@@ -183,7 +209,7 @@ jobs:
         run: |
           if vcn authenticate \
             --output json \
-            "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:sha-${{ needs.information.outputs.sha_short }}" \
+            "docker://ghcr.io/aperim/vlc-player-${{ matrix.dockerfile }}:sha-${{ needs.information.outputs.sha_short }}" \
             | jq \
               --exit-status \
               '.verification.status != 0';
@@ -191,7 +217,7 @@ jobs:
             vcn login
             vcn notarize \
               --public \
-              "docker://ghcr.io/aperim/vlc-player-${{ matrix.varient.os-id }}:sha-${{ needs.information.outputs.sha_short }}"
+              "docker://ghcr.io/aperim/vlc-player-${{ matrix.dockerfile }}:sha-${{ needs.information.outputs.sha_short }}"
           fi
         # yamllint enable rule:line-length
         env:

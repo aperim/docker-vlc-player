@@ -1,41 +1,5 @@
 {
   "name": "Docker VLC Playeer",
   "description": "Plays unicast or multicast streams out the HDMI port",
-  "vendor": "Aperim Pty Ltd",
-  "matrix": {
-    "varient": [
-      {
-        "os": "ubuntu-latest",
-        "os-id": "linux",
-        "base": "debian",
-        "tag": "bullseye-slim",
-        "platforms": "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x",
-        "dockerfile": "general"
-      },
-      {
-        "os": "ARM",
-        "os-id": "raspberrypi2",
-        "base": "raspbian/stretch",
-        "tag": "latest",
-        "platforms": "linux/arm/v6",
-        "dockerfile": "raspberry"
-      },
-      {
-        "os": "ARM",
-        "os-id": "raspberrypi3",
-        "base": "raspbian/stretch",
-        "tag": "latest",
-        "platforms": "linux/arm/v7",
-        "dockerfile": "raspberry"
-      },
-      {
-        "os": "ARM",
-        "os-id": "rpi",
-        "base": "raspbian/stretch",
-        "tag": "latest",
-        "platforms": "linux/arm/v6,linux/arm/v7,linux/arm64/v8",
-        "dockerfile": "raspberry"
-      }
-    ]
-  }
+  "vendor": "Aperim Pty Ltd"
 }
