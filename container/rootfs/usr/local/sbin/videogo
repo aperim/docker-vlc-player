@@ -69,12 +69,12 @@ fi
 SHUTTING_DOWN=false
 cleanup() {
     SHUTTING_DOWN=true
-    if [ "$vlcpid" ] && kill -0 "$vlcpid" 2> /dev/null; then
+    if [ "$vlcpid" ] && kill -0 "$vlcpid" 2>/dev/null; then
         kill "$vlcpid"
         wait "$vlcpid"
     fi
 
-    if [ "$xpid" ] && kill -0 "$xpid" 2> /dev/null; then
+    if [ "$xpid" ] && kill -0 "$xpid" 2>/dev/null; then
         kill "$xpid"
         wait "$xpid"
         xorg=$?
@@ -114,7 +114,8 @@ trap 'cleanup exit' EXIT HUP TERM QUIT
 # USR1 signal trap which obviates the need to poll for server readiness.
 trap 'DISPLAY=:$tty exec "${@:-$cfgdir/sxrc}" & wait "$!"' USR1
 
-(trap '' USR1 && exec Xorg :"$tty" -keeptty vt"$tty" -noreset -auth "$XAUTHORITY") & xpid=$!
+(trap '' USR1 && exec Xorg :"$tty" -keeptty vt"$tty" -noreset -auth "$XAUTHORITY") &
+xpid=$!
 wait "$xpid"
 ${XSET} s off
 ${XSET} -dpms
