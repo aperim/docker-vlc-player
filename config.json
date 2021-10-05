@@ -30,7 +30,7 @@
         "os-id": "rpi",
         "base": "balenalib/raspberrypi4-64-debian",
         "tag": "latest",
-        "platforms": "linux/arm/v7,linux/arm64/v8"
+        "platforms": "linux/arm64/v8"
       }
     ]
   }
