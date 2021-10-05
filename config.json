@@ -31,7 +31,7 @@
       {
         "os": "ARM",
         "os-id": "rpi",
-        "base": "linux/arm/v7,linux/arm64/v8",
+        "base": "raspbian/stretch",
         "tag": "latest",
         "platforms": "linux/arm/v6,linux/arm/v7,linux/arm64/v8",
         "dockerfile": "raspberry"
