@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -i
 # videogo - start an x server and play a video
 #
 # some help from https://github.com/Earnestly/sx/blob/master/sx
