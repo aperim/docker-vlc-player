@@ -154,6 +154,7 @@ jobs:
           - os: "debian"
             tag: "latest"
           - os: "raspbian/stretch"
+            # yamllint disable-line rule:line-length
             platform: "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
           - os: "debian"
             platform: "linux/arm/v6,linux/arm/v7,linux/arm64/v8"
