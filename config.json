@@ -9,28 +9,32 @@
         "os-id": "linux",
         "base": "debian",
         "tag": "bullseye-slim",
-        "platforms": "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
+        "platforms": "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x",
+        "dockerfile": "general"
       },
       {
         "os": "ARM",
         "os-id": "raspberrypi2",
-        "base": "balenalib/raspberry-pi2-debian",
+        "base": "raspbian/stretch",
         "tag": "latest",
-        "platforms": "linux/arm/v6"
+        "platforms": "linux/arm/v6",
+        "dockerfile": "raspberry"
       },
       {
         "os": "ARM",
         "os-id": "raspberrypi3",
-        "base": "balenalib/raspberrypi3-debian",
+        "base": "raspbian/stretch",
         "tag": "latest",
-        "platforms": "linux/arm/v7,linux/arm64/v8"
+        "platforms": "linux/arm/v7",
+        "dockerfile": "raspberry"
       },
       {
         "os": "ARM",
         "os-id": "rpi",
-        "base": "balenalib/raspberrypi4-64-debian",
+        "base": "linux/arm/v7,linux/arm64/v8",
         "tag": "latest",
-        "platforms": "linux/arm64/v8"
+        "platforms": "linux/arm/v6,linux/arm/v7,linux/arm64/v8",
+        "dockerfile": "raspberry"
       }
     ]
   }
