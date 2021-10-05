@@ -12,23 +12,23 @@
         "platforms": "linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
       },
       {
-        "os": "ubuntu-latest",
+        "os": "self-hosted",
         "os-id": "raspberrypi2",
-        "base": "balenalib/raspberry-pi2",
+        "base": "balenalib/raspberry-pi2-debian",
         "tag": "latest",
         "platforms": "linux/arm/v6"
       },
       {
-        "os": "ubuntu-latest",
+        "os": "self-hosted",
         "os-id": "raspberrypi3",
-        "base": "balenalib/raspberrypi3-64",
+        "base": "balenalib/raspberrypi3-debian",
         "tag": "latest",
         "platforms": "linux/arm/v7,linux/arm64/v8"
       },
       {
-        "os": "ubuntu-latest",
+        "os": "self-hosted",
         "os-id": "rpi",
-        "base": "balenalib/raspberrypi4-64",
+        "base": "balenalib/raspberrypi4-debian",
         "tag": "latest",
         "platforms": "linux/arm/v7,linux/arm64/v8"
       }
