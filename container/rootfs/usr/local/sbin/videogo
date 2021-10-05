@@ -52,10 +52,6 @@ if [ -z "${VLC_ZOOM}" ]; then
     VLC_ZOOM=1
 fi
 
-if [ -z "${VLC_DISPLAY}" ]; then
-    VLC_DISPLAY=:0
-fi
-
 if [ -z "${VLC_AVCODEC_OPTIONS}" ]; then
     # VLC_AVCODEC_OPTIONS="--avcodec-dr --avcodec-corrupted --avcodec-hurry-up --avcodec-skip-frame=1 --avcodec-skip-idct=1 --avcodec-fast --avcodec-threads=${VLC_THREADS} --sout-avcodec-strict=-2"
     VLC_AVCODEC_OPTIONS=""
@@ -65,63 +61,78 @@ fi
 # shellcheck disable=SC2086
 sed -i 's/geteuid/getppid/' ${REAL_VLC}
 
-# Remove the X server lock file so ours starts cleanly
-rm /tmp/.X0-lock &>/dev/null || true
-
-# Create XDG_RUNTIME_DIR
-if [ -d "${HOME}/.cache" ]; then
-    rm -Rf ~/.cache
-fi
-mkdir -pv ~/.cache/xdgr
-export XDG_RUNTIME_DIR=$PATH:~/.cache/xdgr
-
-# Set the display to use
-export DISPLAY=${VLC_DISPLAY}
-
 # Set the DBUS address for sending around system messages
 if [ -f "/host/run/dbus/system_bus_socket" ]; then
     export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
 fi
 
-# Start the desktop manager
-echo "STARTING X"
-startx -- -nocursor &
-CHILD_STARTX=$!
-
-# TODO: work out how to detect X has started
-sleep 10
-
 SHUTTING_DOWN=false
-_term() {
+cleanup() {
     SHUTTING_DOWN=true
-    echo "👋 Shutting down..."
-    if [ -n "${CHILD_VLC}" ]; then
-        kill -TERM "$CHILD_VLC" 2>/dev/null
+    if [ "$vlcpid" ] && kill -0 "$vlcpid" 2> /dev/null; then
+        kill "$vlcpid"
+        wait "$vlcpid"
     fi
-    if [ -n "${CHILD_STARTX}" ]; then
-        kill -TERM "$CHILD_STARTX" 2>/dev/null
+
+    if [ "$xpid" ] && kill -0 "$xpid" 2> /dev/null; then
+        kill "$xpid"
+        wait "$xpid"
+        xorg=$?
+    fi
+
+    if ! stty "$stty"; then
+        stty sane
+    fi
+
+    xauth remove :"$tty"
+
+    if [ "$1" = exit ]; then
+        exit "${xorg:-0}"
     fi
 }
 
-trap _term INT TERM
+stty=$(stty -g)
+tty=$(tty)
+tty=${tty#/dev/tty}
+
+cfgdir=${XDG_CONFIG_HOME:-$HOME/.config}/sx
+datadir=${XDG_DATA_HOME:-$HOME/.local/share}/sx
+mkdir -p -- "$cfgdir" "$datadir"
+
+export XAUTHORITY="${XAUTHORITY:-$datadir/xauthority}"
+touch -- "$XAUTHORITY"
+
+xauth add :"$tty" MIT-MAGIC-COOKIE-1 "$(od -An -N16 -tx /dev/urandom | tr -d ' ')"
+
+trap 'cleanup; trap - INT; kill -INT "$$"' INT
+trap 'cleanup exit' EXIT HUP TERM QUIT
+
+# Xorg will check whether it inherited a USR1 with a disposition of SIG_IGN and
+# use this state to reply back to the parent process with its own USR1.
+# This is done to indicate that the server is ready to accept connections.
+# Taking advantage of this feature allows launching the client directly from a
+# USR1 signal trap which obviates the need to poll for server readiness.
+trap 'DISPLAY=:$tty exec "${@:-$cfgdir/sxrc}" & wait "$!"' USR1
+
+(trap '' USR1 && exec Xorg :"$tty" -keeptty vt"$tty" -noreset -auth "$XAUTHORITY") & xpid=$!
+wait "$xpid"
+${XSET} s off
+${XSET} -dpms
+${XSET} s noblank
+
+# Hide the cursor
+unclutter -display :"$tty" -idle 0.1 &
 
 # Start the VLC media player
-VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display ${DISPLAY} ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
+VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display :"$tty" ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
 while :; do
-    ${XSET} s off
-    ${XSET} -dpms
-    ${XSET} s noblank
-
-    # Hide the cursor
-    unclutter -display ${DISPLAY} -idle 0.1 &
-
     echo "📺 Starting VLC"
     echo "🖥 ${VLC_COMMAND}"
     # shellcheck disable=SC2086
     nice -n -20 ${VLC_COMMAND} &
-    CHILD_VLC=$!
-    echo "🆔 VLC Running as PID ${CHILD_VLC}"
-    wait "$CHILD_VLC"
+    vlcpid=$!
+    echo "🆔 VLC Running as PID ${vlcpid}"
+    wait "$vlcpid"
     echo "👋 VLC Stream Finished"
     if [ "$SHUTTING_DOWN" = true ]; then
         break
