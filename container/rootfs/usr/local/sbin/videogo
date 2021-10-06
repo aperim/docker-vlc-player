@@ -243,10 +243,10 @@ echo "🪟 Starting X"
 # USR1 signal trap which obviates the need to poll for server readiness.
 trap 'startvlc' USR1
 
-# (trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
+(trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
 # (trap '' USR1 && exec Xorg "$display" -nocursor -auth "${xserverauthfile}") & pid=$!
 xpid=$!
 sleep 15
-DISPLAY=$display ${VLC}
+${VLC_COMMAND}
 echo "🪟 X Started"
 wait "$xpid"
