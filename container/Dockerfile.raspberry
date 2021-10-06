@@ -13,9 +13,9 @@ HEALTHCHECK \
 RUN sed -i --regexp-extended 's/ (stretch)|(buster) / bullseye /i' /etc/apt/sources.list && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get dist-upgrade -y && \
-    apt-get -y upgrade && \
+    apt-get -y full-upgrade && \
     apt-get -y autoremove && \
-    apt-get install -y locales
+    apt-get install -y ca-certificates locales rpi-update vim
 
 # Defaults, can be changed at build time
 ARG LANG=en_US.UTF-8
