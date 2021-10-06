@@ -1,11 +1,28 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # videogo - start an x server and play a video
 #
 # some help from https://github.com/Earnestly/sx/blob/master/sx
 
+unset DBUS_SESSION_BUS_ADDRESS
+unset SESSION_MANAGER
 VLC=$(command -v cvlc)
 REAL_VLC=$(command -v vlc)
 XSET=$(command -v xset)
+
+userclientrc=$HOME/.xinitrc
+sysclientrc=/etc/X11/xinit/xinitrc
+
+userserverrc=$HOME/.xserverrc
+sysserverrc=/etc/X11/xinit/xserverrc
+defaultclient=/usr/bin/xterm
+defaultserver=/usr/bin/X
+defaultclientargs=""
+defaultserverargs=""
+defaultdisplay=""
+clientargs=""
+serverargs=""
+vtarg=""
+enable_xauth=1
 
 if [ -z "${VLC_SOURCE_URL}" ]; then
     echo "Source URL not defined (VLC_SOURCE_URL)"
@@ -68,6 +85,7 @@ fi
 
 SHUTTING_DOWN=false
 cleanup() {
+    echo "👋 Shutting down..."
     SHUTTING_DOWN=true
     if [ "$vlcpid" ] && kill -0 "$vlcpid" 2>/dev/null; then
         kill "$vlcpid"
@@ -80,63 +98,153 @@ cleanup() {
         xorg=$?
     fi
 
-    if ! stty "$stty"; then
-        stty sane
+    if [ x"$removelist" != x ]; then
+        xauth remove $removelist
     fi
-
-    xauth remove :"$tty"
+    if [ x"$xserverauthfile" != x ]; then
+        rm -f "$xserverauthfile"
+    fi
 
     if [ "$1" = exit ]; then
         exit "${xorg:-0}"
     fi
 }
 
-stty=$(stty -g)
-# tty=$(tty)
-# tty=${tty#/dev/tty}
-tty=0
+startvlc() {
+    DISPLAY=$display ${XSET} s off
+    DISPLAY=$display ${XSET} -dpms
+    DISPLAY=$display ${XSET} s noblank
 
-cfgdir=${XDG_CONFIG_HOME:-$HOME/.config}/sx
-datadir=${XDG_DATA_HOME:-$HOME/.local/share}/sx
-mkdir -p -- "$cfgdir" "$datadir"
+    # Hide the cursor
+    unclutter -display "$display" -idle 0.1 &
 
-export XAUTHORITY="${XAUTHORITY:-$datadir/xauthority}"
-touch -- "$XAUTHORITY"
+    # Start the VLC media player
+    VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display ${display} ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
+    while :; do
+        echo "📺 Starting VLC"
+        echo "🖥 ${VLC_COMMAND}"
+        # shellcheck disable=SC2086
+        nice -n -20 ${VLC_COMMAND} &
+        vlcpid=$!
+        echo "🆔 VLC Running as PID ${vlcpid}"
+        wait "$vlcpid"
+        echo "👋 VLC Stream Finished"
+        if [ "$SHUTTING_DOWN" = true ]; then
+            break
+        fi
+    done
+}
 
-xauth add :"$tty" MIT-MAGIC-COOKIE-1 "$(od -An -N16 -tx /dev/urandom | tr -d ' ')"
+# Automatically determine an unused $DISPLAY
+d=0
+while true; do
+    [ -e "/tmp/.X$d-lock" -o -S "/tmp/.X11-unix/X$d" ] || break
+    d=$(($d + 1))
+done
+defaultdisplay=":$d"
+unset d
+
+if [ -f "$userclientrc" ]; then
+    client=$userclientrc
+elif [ -f "$sysclientrc" ]; then
+    client=$sysclientrc
+fi
+
+server=$defaultserver
+
+# When starting the defaultserver start X on the current tty to avoid
+# the startx session being seen as inactive:
+# "https://bugzilla.redhat.com/show_bug.cgi?id=806491"
+tty=$(tty)
+if expr "$tty" : '/dev/tty[0-9][0-9]*$' >/dev/null; then
+    tty_num=$(echo "$tty" | grep -oE '[0-9]+$')
+    vtarg="vt$tty_num -keeptty"
+fi
+
+# For compatibility reasons, only use xserverrc if there were no server command line arguments
+if [ x"$serverargs" = x -a x"$display" = x ]; then
+    if [ -f "$userserverrc" ]; then
+        server=$userserverrc
+    elif [ -f "$sysserverrc" ]; then
+        server=$sysserverrc
+    fi
+fi
+serverargs="$serverargs $vtarg"
+display=$defaultdisplay
+
+if [ x"$XAUTHORITY" = x ]; then
+    XAUTHORITY=$HOME/.Xauthority
+    export XAUTHORITY
+fi
+
+removelist=
+
+# set up default Xauth info for this machine
+
+# check for GNU hostname
+if hostname --version >/dev/null 2>&1; then
+    if [ -z "$(hostname --version 2>&1 | grep GNU)" ]; then
+        hostname=$(hostname -f)
+    fi
+fi
+
+if [ -z "$hostname" ]; then
+    hostname=$(hostname)
+fi
+
+authdisplay=${display:-:0}
+
+mcookie=$(/usr/bin/mcookie)
+
+if test x"$mcookie" = x; then
+    echo "Couldn't create cookie"
+    exit 1
+fi
+dummy=0
+
+# create a file with auth information for the server. ':0' is a dummy.
+xserverauthfile=$(mktemp --tmpdir serverauth.XXXXXXXXXX)
+trap "rm -f '$xserverauthfile'" HUP INT QUIT ILL TRAP KILL BUS TERM
+xauth -q -f "$xserverauthfile" <<EOF
+add :$dummy . $mcookie
+EOF
+
+serverargs=${serverargs}" -auth "${xserverauthfile}
+
+# now add the same credentials to the client authority file
+# if '$displayname' already exists do not overwrite it as another
+# server may need it. Add them to the '$xserverauthfile' instead.
+for displayname in $authdisplay $hostname$authdisplay; do
+    authcookie=$(xauth list "$displayname" |
+        sed -n "s/.*$displayname[[:space:]*].*[[:space:]*]//p") 2>/dev/null
+    if [ "z${authcookie}" = "z" ]; then
+        xauth -q <<EOF
+add $displayname . $mcookie
+EOF
+        removelist="$displayname $removelist"
+    else
+        dummy=$(($dummy + 1))
+        xauth -q -f "$xserverauthfile" <<EOF
+add :$dummy . $authcookie
+EOF
+    fi
+done
 
 trap 'cleanup; trap - INT; kill -INT "$$"' INT
 trap 'cleanup exit' EXIT HUP TERM QUIT
+
+echo "🪟 Starting X"
 
 # Xorg will check whether it inherited a USR1 with a disposition of SIG_IGN and
 # use this state to reply back to the parent process with its own USR1.
 # This is done to indicate that the server is ready to accept connections.
 # Taking advantage of this feature allows launching the client directly from a
 # USR1 signal trap which obviates the need to poll for server readiness.
-trap 'DISPLAY=:$tty exec "${@:-$cfgdir/sxrc}" & wait "$!"' USR1
+trap 'startvlc' USR1
 
-(trap '' USR1 && exec Xorg :"$tty" -keeptty vt"$tty" -noreset -auth "$XAUTHORITY") &
+(trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
 xpid=$!
+sleep 15
+DISPLAY=$display ${VLC}
+echo "🪟 X Started"
 wait "$xpid"
-${XSET} s off
-${XSET} -dpms
-${XSET} s noblank
-
-# Hide the cursor
-unclutter -display :"$tty" -idle 0.1 &
-
-# Start the VLC media player
-VLC_COMMAND="${VLC} --verbose=${VLC_VERBOSE} --x11-display :$tty ${VLC_AVCODEC_OPTIONS} --zoom ${VLC_ZOOM} --no-repeat --no-loop --network-caching=${VLC_CACHE} --drop-late-frames --skip-frames --adaptive-logic=${VLC_ADAPTIVE_LOGIC} --adaptive-maxwidth=${VLC_ADAPTIVE_WIDTH} --adaptive-maxheight=${VLC_ADAPTIVE_HEIGHT} --adaptive-bw=${VLC_ADAPTIVE_BITRATE} --no-play-and-pause --play-and-exit --no-disable-screensaver ${VLC_SOURCE_URL} vlc://quit"
-while :; do
-    echo "📺 Starting VLC"
-    echo "🖥 ${VLC_COMMAND}"
-    # shellcheck disable=SC2086
-    nice -n -20 ${VLC_COMMAND} &
-    vlcpid=$!
-    echo "🆔 VLC Running as PID ${vlcpid}"
-    wait "$vlcpid"
-    echo "👋 VLC Stream Finished"
-    if [ "$SHUTTING_DOWN" = true ]; then
-        break
-    fi
-done
