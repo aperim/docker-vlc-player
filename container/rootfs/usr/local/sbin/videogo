@@ -241,12 +241,12 @@ echo "🪟 Starting X"
 # This is done to indicate that the server is ready to accept connections.
 # Taking advantage of this feature allows launching the client directly from a
 # USR1 signal trap which obviates the need to poll for server readiness.
-trap 'startvlc' USR1
+trap 'echo "USR1***"; startvlc' USR1
 
 (trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
-# (trap '' USR1 && exec Xorg "$display" -nocursor -auth "${xserverauthfile}") & pid=$!
+# (trap '' USR1 && exec Xorg "$display" -nocursor -auth "${xserverauthfile}") &
 xpid=$!
 sleep 15
-${VLC_COMMAND}
+startvlc
 echo "🪟 X Started"
 wait "$xpid"
