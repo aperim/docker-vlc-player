@@ -204,6 +204,7 @@ dummy=0
 
 # create a file with auth information for the server. ':0' is a dummy.
 xserverauthfile=$(mktemp --tmpdir serverauth.XXXXXXXXXX)
+# shellcheck disable=SC2173
 trap "rm -f '$xserverauthfile'" HUP INT QUIT ILL TRAP KILL BUS TERM
 xauth -q -f "$xserverauthfile" <<EOF
 add :$dummy . $mcookie
@@ -216,7 +217,7 @@ serverargs=${serverargs}" -auth "${xserverauthfile}
 # server may need it. Add them to the '$xserverauthfile' instead.
 for displayname in $authdisplay $hostname$authdisplay; do
     authcookie=$(xauth list "$displayname" |
-        sed -n "s/.*$displayname[[:space:]*].*[[:space:]*]//p") 2>/dev/null
+        sed -n "s/.*${displayname}[[:space:]*].*[[:space:]*]//p") 2>/dev/null
     if [ "z${authcookie}" = "z" ]; then
         xauth -q <<EOF
 add $displayname . $mcookie
@@ -242,7 +243,8 @@ echo "🪟 Starting X"
 # USR1 signal trap which obviates the need to poll for server readiness.
 trap 'startvlc' USR1
 
-(trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
+# (trap '' USR1 && exec xinit "$client" $clientargs -- "$server" $display $serverargs) &
+# (trap '' USR1 && exec Xorg "$display" -nocursor -auth "${xserverauthfile}") & pid=$!
 xpid=$!
 sleep 15
 DISPLAY=$display ${VLC}
