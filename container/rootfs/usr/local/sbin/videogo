@@ -236,6 +236,7 @@ trap 'cleanup; trap - INT; kill -INT "$$"' INT
 trap 'cleanup exit' EXIT HUP TERM QUIT
 
 echo "🪟 Starting X"
+export XDG_RUNTIME_DIR=/run/user/$UID
 
 # Xorg will check whether it inherited a USR1 with a disposition of SIG_IGN and
 # use this state to reply back to the parent process with its own USR1.
