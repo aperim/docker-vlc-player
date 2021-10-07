@@ -111,9 +111,10 @@ cleanup() {
 }
 
 startvlc() {
-    DISPLAY=$display ${XSET} s off
-    DISPLAY=$display ${XSET} -dpms
-    DISPLAY=$display ${XSET} s noblank
+    export DISPLAY=$display
+    ${XSET} s off
+    ${XSET} -dpms
+    ${XSET} s noblank
 
     # Hide the cursor
     unclutter -display "$display" -idle 0.1 &
