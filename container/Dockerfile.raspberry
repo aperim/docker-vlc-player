@@ -61,12 +61,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    addgroup --gid 1001 vlc && \
+    adduser --home /vlc --gecos "VLC User" --shell /sbin/nologin --uid 1001 --gid 1001 --disabled-password --disabled-login vlc
 
 COPY rootfs/ /
-
-# Enable udevd so that plugged dynamic hardware devices show up in our container.
-ENV UDEV 1
 
 ARG BUILD_DATE
 ARG BUILD_NAME
@@ -91,3 +90,7 @@ LABEL \
     org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.revision=${BUILD_REF} \
     org.opencontainers.image.version=${BUILD_VERSION}
+
+USER vlc
+# Enable udevd so that plugged dynamic hardware devices show up in our container.
+ENV UDEV 1
