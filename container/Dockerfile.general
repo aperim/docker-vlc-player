@@ -57,7 +57,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xserver-xorg-video-*
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    sed -i 's/geteuid/getppid/' "\$(command -v cvlc)" && \
+    sed -i 's/geteuid/getppid/' /usr/bin/vlc && \
+    sed -i 's/geteuid/getppid/' /usr/bin/cvlc && \
     addgroup --gid 1001 vlc && \
     adduser --home /vlc --gecos "VLC User" --shell /sbin/nologin --uid 1001 --gid 1001 --disabled-password --disabled-login vlc
 
@@ -88,5 +89,7 @@ LABEL \
     org.opencontainers.image.version=${BUILD_VERSION}
 
 USER vlc
+
+RUN /usr/bin/vlc --version
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV 1
