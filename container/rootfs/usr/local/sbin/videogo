@@ -76,7 +76,7 @@ fi
 
 # Allow VLC to run as root
 # shellcheck disable=SC2086
-sed -i 's/geteuid/getppid/' ${REAL_VLC}
+# sed -i 's/geteuid/getppid/' ${REAL_VLC}
 
 # Set the DBUS address for sending around system messages
 if [ -f "/host/run/dbus/system_bus_socket" ]; then
