@@ -64,6 +64,7 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     sed -i 's/geteuid/getppid/' /usr/bin/vlc && \
     sed -i 's/geteuid/getppid/' /usr/bin/cvlc && \
+    sed -i --regexp-extended 's/^(allowed_users\s*=\s*)(.*)\$/\1anybody/' /etc/X11/Xwrapper.config && \
     addgroup --gid 1001 vlc && \
     adduser --home /vlc --gecos "VLC User" --shell /sbin/nologin --uid 1001 --gid 1001 --disabled-password --disabled-login vlc
 
